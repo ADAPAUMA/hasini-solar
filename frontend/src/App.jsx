@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 const API = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
@@ -380,13 +380,22 @@ function CustomerTable({ customers, onEdit, onDelete, token, onInlineUpdate }) {
         <table style={styles.table}>
           <thead>
             <tr>
-              {["#", "కస్టమర్ పేరు", "ఊరు", "బ్యాంక్", "బ్యాంక్ ఊరు", "ఫోన్ 1", "స్టేటస్", "📝 Notes / Extra Info", "ఫోన్ 2", "Actions"].map((h) => (
+              {["#", "కస్టమర్ పేరు", "ఊరు", "బ్యాంక్", "బ్యాంక్ ఊరు", "ఫోన్ 1", "స్టేటస్", "📝 Notes", "Bank Account Name", "Bank Office No", "Actions"].map((h) => (
                 <th key={h} style={styles.th}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {customers.map((c, i) => {
+            {Array.from(new Set(customers.map(c => c.customerName[0].toUpperCase()))).sort().map(letter => (
+              <React.Fragment key={letter}>
+                {/* Alphabet Header Row */}
+                <tr style={{ background: "#374151" }}>
+                  <td colSpan="11" style={{ padding: "8px 16px", fontWeight: "bold", color: "#fbbf24", fontSize: "16px" }}>
+                    {letter}
+                  </td>
+                </tr>
+                {/* Customers for this letter */}
+                {customers.filter(c => c.customerName[0].toUpperCase() === letter).map((c, i) => {
               const cfg = STATUS_CONFIG[c.status];
               return (
                 <tr key={c._id} style={{ animation: "fadeIn 0.3s ease" }}>
@@ -411,11 +420,13 @@ function CustomerTable({ customers, onEdit, onDelete, token, onInlineUpdate }) {
                     />
                   </td>
 
-                  {/* Phone 2 */}
                   <td style={styles.td}>
-                    {c.phone2
-                      ? <a href={`tel:${c.phone2}`} style={{ color: "#34d399", textDecoration: "none" }}>📱 {c.phone2}</a>
-                      : <InlineEdit value={c.phone2} customerId={c._id} field="phone2" token={token} onSaved={onInlineUpdate} />
+                    <InlineEdit value={c.bankAccountName} customerId={c._id} field="bankAccountName" token={token} onSaved={onInlineUpdate} />
+                  </td>
+                  <td style={styles.td}>
+                    {c.bankOfficePhone 
+                      ? <a href={`tel:${c.bankOfficePhone}`} style={{ color: "#fbbf24", textDecoration: "none", fontWeight: 700 }}>📞 {c.bankOfficePhone}</a>
+                      : <InlineEdit value={c.bankOfficePhone} customerId={c._id} field="bankOfficePhone" token={token} onSaved={onInlineUpdate} />
                     }
                   </td>
 
@@ -429,6 +440,8 @@ function CustomerTable({ customers, onEdit, onDelete, token, onInlineUpdate }) {
                 </tr>
               );
             })}
+              </React.Fragment>
+            ))}
           </tbody>
         </table>
       )}
@@ -449,38 +462,54 @@ function StatusPill({ cfg }) {
 function CustomerCards({ customers, onEdit, onDelete }) {
   if (customers.length === 0)
     return <div style={styles.empty}>📭 మీ Customers లేరు. కొత్త customer add చేయండి!</div>;
+    
+  // Get unique sorted letters
+  const letters = Array.from(new Set(customers.map(c => c.customerName[0].toUpperCase()))).sort();
+
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: "16px", padding: "16px" }}>
-      {customers.map((c) => {
-        const cfg = STATUS_CONFIG[c.status];
-        return (
-          <div key={c._id} style={{ ...styles.card, borderLeft: `5px solid ${cfg.color}`, animation: "fadeIn 0.3s ease" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "12px" }}>
-              <div>
-                <h3 style={{ margin: 0, color: "#f9fafb", fontSize: "18px" }}>{c.customerName}</h3>
-                <p style={{ margin: "4px 0 0", color: "#9ca3af", fontSize: "13px" }}>📍 {c.village}</p>
-              </div>
-              <StatusPill cfg={cfg} />
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "13px", color: "#d1d5db", marginBottom: "8px" }}>
-              <span>🏦 {c.bank}</span>
-              <span>📍 {c.bankVillage}</span>
-              <a href={`tel:${c.phone}`} style={{ color: "#60a5fa", textDecoration: "none" }}>📱 {c.phone}</a>
-              {c.phone2 && <a href={`tel:${c.phone2}`} style={{ color: "#34d399", textDecoration: "none" }}>📱 {c.phone2}</a>}
-            </div>
-            {c.notes && <div style={{ fontSize: "12px", color: "#9ca3af", padding: "8px", background: "rgba(255,255,255,0.05)", borderRadius: "6px", marginBottom: "10px" }}>📝 {c.notes}</div>}
-            <div style={{ display: "flex", gap: "4px", marginBottom: "12px" }}>
-              {Object.entries(STATUS_CONFIG).map(([key, s]) => (
-                <div key={key} style={{ flex: 1, height: "6px", borderRadius: "3px", background: s.step <= cfg.step ? cfg.color : "#374151" }} />
-              ))}
-            </div>
-            <div style={{ display: "flex", gap: "8px" }}>
-              <button style={{ ...styles.editBtn, flex: 1 }} onClick={() => onEdit(c)}>✏️ Edit</button>
-              <button style={{ ...styles.deleteBtn, flex: 1 }} onClick={() => onDelete(c._id)}>🗑️ Delete</button>
-            </div>
+    <div style={{ padding: "16px" }}>
+      {letters.map(letter => (
+        <div key={letter} style={{ marginBottom: "24px" }}>
+          {/* Alphabet Section Header */}
+          <h2 style={{ color: "#fbbf24", borderBottom: "2px solid #374151", paddingBottom: "8px", margin: "0 0 16px 0" }}>
+            {letter}
+          </h2>
+          {/* Grid of Cards for this letter */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: "16px" }}>
+            {customers.filter(c => c.customerName[0].toUpperCase() === letter).map((c) => {
+              const cfg = STATUS_CONFIG[c.status];
+              return (
+                <div key={c._id} style={{ ...styles.card, borderLeft: `5px solid ${cfg.color}`, animation: "fadeIn 0.3s ease" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "12px" }}>
+                    <div>
+                      <h3 style={{ margin: 0, color: "#f9fafb", fontSize: "18px" }}>{c.customerName}</h3>
+                      <p style={{ margin: "4px 0 0", color: "#9ca3af", fontSize: "13px" }}>📍 {c.village}</p>
+                    </div>
+                    <StatusPill cfg={cfg} />
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "13px", color: "#d1d5db", marginBottom: "8px" }}>
+                    <span>🏦 {c.bank}</span>
+                    <span>📍 {c.bankVillage}</span>
+                    <span style={{ gridColumn: "1 / -1", color: "#fbbf24" }}>💳 {c.bankAccountName || "No Account Name"}</span>
+                    {c.bankOfficePhone && <a href={`tel:${c.bankOfficePhone}`} style={{ color: "#fbbf24", textDecoration: "none", gridColumn: "1 / -1" }}>📞 Bank Office: {c.bankOfficePhone}</a>}
+                    <a href={`tel:${c.phone}`} style={{ color: "#60a5fa", textDecoration: "none", gridColumn: "1 / -1" }}>📱 Phone 1: {c.phone}</a>
+                  </div>
+                  {c.notes && <div style={{ fontSize: "12px", color: "#9ca3af", padding: "8px", background: "rgba(255,255,255,0.05)", borderRadius: "6px", marginBottom: "10px" }}>📝 {c.notes}</div>}
+                  <div style={{ display: "flex", gap: "4px", marginBottom: "12px" }}>
+                    {Object.entries(STATUS_CONFIG).map(([key, s]) => (
+                      <div key={key} style={{ flex: 1, height: "6px", borderRadius: "3px", background: s.step <= cfg.step ? cfg.color : "#374151" }} />
+                    ))}
+                  </div>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <button style={{ ...styles.editBtn, flex: 1 }} onClick={() => onEdit(c)}>✏️ Edit</button>
+                    <button style={{ ...styles.deleteBtn, flex: 1 }} onClick={() => onDelete(c._id)}>🗑️ Delete</button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        );
-      })}
+        </div>
+      ))}
     </div>
   );
 }
@@ -492,26 +521,24 @@ function CustomerModal({ customer, token, onClose, onSaved }) {
     village:      customer?.village || "",
     bank:         customer?.bank || "",
     bankVillage:  customer?.bankVillage || "",
+    bankAccountName: customer?.bankAccountName || "",
+    bankOfficePhone: customer?.bankOfficePhone || "",
     phone:        customer?.phone || "",
-    phone2:       customer?.phone2 || "",
     status:       customer?.status || "bank_payment_1",
     notes:        customer?.notes || "",
   });
   const [error, setError] = useState("");
   const [phoneError, setPhoneError] = useState("");
-  const [phone2Error, setPhone2Error] = useState("");
   const [loading, setLoading] = useState(false);
 
   const set = (k) => (v) => setForm((f) => ({ ...f, [k]: v }));
 
   const validateAndSave = async () => {
-    setError(""); setPhoneError(""); setPhone2Error("");
+    setError(""); setPhoneError("");
     if (!form.customerName || !form.village || !form.bank || !form.phone)
       return setError("అన్ని required fields పూరించండి");
     if (!isValidPhone(form.phone))
       return setPhoneError("చెల్లుబాటు అయ్యే 10-digit ఫోన్ నంబర్ ఇవ్వండి (6-9తో మొదలవ్వాలి)");
-    if (form.phone2 && !isValidPhone(form.phone2))
-      return setPhone2Error("చెల్లుబాటు అయ్యే 10-digit ఫోన్ నంబర్ ఇవ్వండి");
     setLoading(true);
     const isEdit = !!customer;
     const res = await apiFetch(
@@ -550,18 +577,19 @@ function CustomerModal({ customer, token, onClose, onSaved }) {
             <input style={styles.modalInput} value={form.bankVillage} onChange={(e) => set("bankVillage")(e.target.value)} placeholder="Bank Location" />
           </div>
           <div>
-            <label style={styles.label}>ఫోన్ నంబర్ 1 * 📱</label>
+            <label style={styles.label}>ఫోన్ నంబర్ * 📱</label>
             <input style={{ ...styles.modalInput, borderColor: phoneError ? "#ef4444" : "#374151" }}
               value={form.phone} onChange={(e) => { set("phone")(e.target.value); setPhoneError(""); }}
               placeholder="10-digit mobile number" maxLength={10} type="tel" />
             {phoneError && <p style={{ color: "#ef4444", fontSize: "11px", margin: "4px 0 0" }}>⚠️ {phoneError}</p>}
           </div>
           <div>
-            <label style={styles.label}>ఫోన్ నంబర్ 2 (Optional) 📱</label>
-            <input style={{ ...styles.modalInput, borderColor: phone2Error ? "#ef4444" : "#374151" }}
-              value={form.phone2} onChange={(e) => { set("phone2")(e.target.value); setPhone2Error(""); }}
-              placeholder="Alternate phone (optional)" maxLength={10} type="tel" />
-            {phone2Error && <p style={{ color: "#ef4444", fontSize: "11px", margin: "4px 0 0" }}>⚠️ {phone2Error}</p>}
+            <label style={styles.label}>Bank Account Name 💳</label>
+            <input style={styles.modalInput} value={form.bankAccountName} onChange={(e) => set("bankAccountName")(e.target.value)} placeholder="A/C Holder Name" />
+          </div>
+          <div>
+            <label style={styles.label}>Bank Office Number 📞</label>
+            <input style={styles.modalInput} value={form.bankOfficePhone} onChange={(e) => set("bankOfficePhone")(e.target.value)} placeholder="Bank Office Phone" />
           </div>
           <div style={{ gridColumn: "1 / -1" }}>
             <label style={styles.label}>స్టేటస్</label>

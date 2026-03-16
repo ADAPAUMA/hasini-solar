@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(cors());
 
 const JWT_SECRET = process.env.JWT_SECRET || 'hasini-solar-secret-2024';
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/hasini_solar';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/hasini_solar';
 
 mongoose.connect(MONGO_URI)
   .then(() => console.log('MongoDB connected'))
@@ -29,8 +29,9 @@ const customerSchema = new mongoose.Schema({
   village:      { type: String, required: true },
   bank:         { type: String, required: true },
   bankVillage:  { type: String, required: true },
+  bankAccountName: { type: String, default: '' },
+  bankOfficePhone: { type: String, default: '' },
   phone:        { type: String, required: true },
-  phone2:       { type: String, default: '' },
   status: {
     type: String,
     enum: ['bank_payment_1','site_installation','bank_payment_2','site_completed'],
@@ -87,8 +88,9 @@ app.get('/api/customers', auth, async (req, res) => {
         { customerName: new RegExp(search, 'i') },
         { village:      new RegExp(search, 'i') },
         { bank:         new RegExp(search, 'i') },
+        { bankAccountName: new RegExp(search, 'i') },
+        { bankOfficePhone: new RegExp(search, 'i') },
         { phone:        new RegExp(search, 'i') },
-        { phone2:       new RegExp(search, 'i') },
       ];
     }
     if (status) filter.status = status;
@@ -100,6 +102,13 @@ app.get('/api/customers', auth, async (req, res) => {
 // CREATE customer - always belongs to current user
 app.post('/api/customers', auth, async (req, res) => {
   try {
+    const { customerName, phone } = req.body;
+    const existing = await Customer.findOne({ 
+      $or: [{ customerName }, { phone }] 
+    });
+    if (existing) {
+      return res.status(400).json({ message: 'ఈ పేరు లేదా ఫోన్ నంబర్‌తో కస్టమర్ ఇప్పటికే ఉన్నారు' });
+    }
     const customer = await Customer.create({ ...req.body, createdBy: req.user.id });
     res.status(201).json(customer);
   } catch (err) { res.status(400).json({ message: err.message }); }
