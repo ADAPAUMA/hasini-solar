@@ -36,16 +36,38 @@ const SolarBG = () => (
       backgroundRepeat: "no-repeat",
       filter: "brightness(0.5) contrast(1.1)",
     }} />
-    {/* Dark overlay for readability */}
+    {/* Dynamic Vibrant Overlay for Readability & Color */}
     <div style={{
       position: "absolute", inset: 0,
-      background: "linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,58,95,0.7) 50%, rgba(15,76,42,0.7) 100%)",
+      background: "linear-gradient(135deg, rgba(8,17,40,0.85) 0%, rgba(31,10,65,0.75) 50%, rgba(13,65,58,0.7) 100%)",
+      mixBlendMode: "multiply"
     }} />
     <style>{`
       @keyframes spin    { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
       @keyframes fadeIn  { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
       @keyframes slideIn { from{opacity:0;transform:translateX(-30px)} to{opacity:1;transform:translateX(0)} }
       @keyframes pulse   { 0%,100%{opacity:1} 50%{opacity:0.5} }
+      
+      /* Vibrant Hover Effects */
+      .hover-row:hover {
+        background-color: rgba(251, 191, 36, 0.08) !important;
+        transition: background-color 0.2s ease;
+      }
+      .hover-card {
+        transition: all 0.3s ease;
+      }
+      .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5), 0 0 15px rgba(251,191,36,0.15);
+        border-color: rgba(251,191,36,0.3) !important;
+      }
+      .hover-btn {
+        transition: all 0.2s ease;
+      }
+      .hover-btn:hover {
+        filter: brightness(1.2);
+        transform: scale(1.02);
+      }
     `}</style>
   </div>
 );
@@ -91,7 +113,7 @@ function RegisterPage({ onSwitch, onSuccess }) {
       <Input placeholder="Email Address" value={form.email} onChange={(v) => setForm({...form, email: v})} type="email" icon="📧" />
       <Input placeholder="Password (min 6 chars)" value={form.password} onChange={(v) => setForm({...form, password: v})} type="password" icon="🔒" />
       <Input placeholder="Confirm Password" value={form.confirm} onChange={(v) => setForm({...form, confirm: v})} type="password" icon="🔑" />
-      <button style={styles.primaryBtn} onClick={submit} disabled={loading}>{loading ? "⏳ Registering..." : "✅ Register చేయండి"}</button>
+      <button className="hover-btn" style={styles.primaryBtn} onClick={submit} disabled={loading}>{loading ? "⏳ Registering..." : "✅ Register చేయండి"}</button>
       <p style={styles.switchText}>ఖాతా ఉందా? <span style={styles.link} onClick={onSwitch}>Login చేయండి</span></p>
     </div>
   );
@@ -121,7 +143,7 @@ function LoginPage({ onSwitch, onSuccess }) {
       {error && <div style={styles.error}>{error}</div>}
       <Input placeholder="Email Address" value={form.email} onChange={(v) => setForm({...form, email: v})} type="email" icon="📧" />
       <Input placeholder="Password" value={form.password} onChange={(v) => setForm({...form, password: v})} type="password" icon="🔒" onEnter={submit} />
-      <button style={styles.primaryBtn} onClick={submit} disabled={loading}>{loading ? "⏳ Logging in..." : "🔓 Login చేయండి"}</button>
+      <button className="hover-btn" style={styles.primaryBtn} onClick={submit} disabled={loading}>{loading ? "⏳ Logging in..." : "🔓 Login చేయండి"}</button>
       <p style={styles.switchText}>ఖాతా లేదా? <span style={styles.link} onClick={onSwitch}>Register చేయండి</span></p>
     </div>
   );
@@ -221,7 +243,7 @@ function Dashboard({ user, token, onLogout }) {
           <h2 style={{ color: "#fbbf24", margin: "0 0 16px" }}>📢 Broadcast Messages Manager</h2>
           <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
              <input value={editAnnouncement} onChange={(e) => setEditAnnouncement(e.target.value)} placeholder="Type new announcement for all users..." style={{ ...styles.input, flex: 1, marginBottom: 0 }} />
-             <button onClick={saveAnnouncement} disabled={isSavingAnn} style={{ ...styles.addBtn, padding: "10px 20px" }}>
+             <button className="hover-btn" onClick={saveAnnouncement} disabled={isSavingAnn} style={{ ...styles.addBtn, padding: "10px 20px" }}>
                {isSavingAnn ? "⏳" : (editingId ? "Update" : "Add Broadcast")}
              </button>
              {editingId && <button onClick={() => { setEditingId(null); setEditAnnouncement(""); }} style={{ ...styles.logoutBtn, padding: "10px 20px", marginTop: "0px" }}>Cancel</button>}
@@ -232,8 +254,8 @@ function Dashboard({ user, token, onLogout }) {
               <div key={ann._id} style={{ ...styles.card, padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ color: "#f9fafb", fontSize: "15px" }}>{ann.message}</span>
                 <div style={{ display: "flex", gap: "8px" }}>
-                  <button onClick={() => { setEditingId(ann._id); setEditAnnouncement(ann.message); }} style={styles.editBtn}>✏️ Edit</button>
-                  <button onClick={() => deleteAnnouncement(ann._id)} style={styles.deleteBtn}>🗑️ Delete</button>
+                  <button className="hover-btn" onClick={() => { setEditingId(ann._id); setEditAnnouncement(ann.message); }} style={styles.editBtn}>✏️ Edit</button>
+                  <button className="hover-btn" onClick={() => deleteAnnouncement(ann._id)} style={styles.deleteBtn}>🗑️ Delete</button>
                 </div>
               </div>
             ))}
@@ -278,10 +300,10 @@ function Dashboard({ user, token, onLogout }) {
               {Object.entries(STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.labelEn}</option>)}
             </select>
             <div style={{ display: "flex", gap: "8px" }}>
-              <button style={{ ...styles.iconBtn, background: view === "table" ? "#3b82f6" : "#374151" }} onClick={() => setView("table")}>☰</button>
-              <button style={{ ...styles.iconBtn, background: view === "cards" ? "#3b82f6" : "#374151" }} onClick={() => setView("cards")}>⊞</button>
+              <button className="hover-btn" style={{ ...styles.iconBtn, background: view === "table" ? "#3b82f6" : "#374151" }} onClick={() => setView("table")}>☰</button>
+              <button className="hover-btn" style={{ ...styles.iconBtn, background: view === "cards" ? "#3b82f6" : "#374151" }} onClick={() => setView("cards")}>⊞</button>
             </div>
-            <button style={styles.addBtn} onClick={() => { setEditCustomer(null); setShowModal(true); }}>+ కొత్త కస్టమర్</button>
+            <button className="hover-btn" style={styles.addBtn} onClick={() => { setEditCustomer(null); setShowModal(true); }}>+ కొత్త కస్టమర్</button>
           </div>
 
           {loading ? (
@@ -380,7 +402,7 @@ function CustomerTable({ customers, onEdit, onDelete, token, onInlineUpdate }) {
         <table style={styles.table}>
           <thead>
             <tr>
-              {["#", "కస్టమర్ పేరు", "ఊరు", "బ్యాంక్", "బ్యాంక్ ఊరు", "ఫోన్ 1", "స్టేటస్", "📝 Notes", "Bank Account Name", "Bank Office No", "Actions"].map((h) => (
+              {["#", "కస్టమర్ పేరు", "ఊరు", "బ్యాంక్", "బ్యాంక్ ఊరు", "ఫోన్ 1", "స్టేటస్", "📝 Notes", "Bank Officer Name", "Bank Office No", "Actions"].map((h) => (
                 <th key={h} style={styles.th}>{h}</th>
               ))}
             </tr>
@@ -398,7 +420,7 @@ function CustomerTable({ customers, onEdit, onDelete, token, onInlineUpdate }) {
                 {customers.filter(c => c.customerName[0].toUpperCase() === letter).map((c, i) => {
               const cfg = STATUS_CONFIG[c.status];
               return (
-                <tr key={c._id} style={{ animation: "fadeIn 0.3s ease" }}>
+                <tr className="hover-row" key={c._id} style={{ animation: "fadeIn 0.3s ease" }}>
                   <td style={styles.td}>{i + 1}</td>
                   <td style={{ ...styles.td, fontWeight: 600 }}>{c.customerName}</td>
                   <td style={styles.td}>{c.village}</td>
@@ -433,8 +455,8 @@ function CustomerTable({ customers, onEdit, onDelete, token, onInlineUpdate }) {
                   {/* ✅ Edit + Delete always visible */}
                   <td style={styles.td}>
                     <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                      <button style={styles.editBtn} onClick={() => onEdit(c)}>✏️ Edit</button>
-                      <button style={styles.deleteBtn} onClick={() => onDelete(c._id)}>🗑️ Delete</button>
+                      <button className="hover-btn" style={styles.editBtn} onClick={() => onEdit(c)}>✏️ Edit</button>
+                      <button className="hover-btn" style={styles.deleteBtn} onClick={() => onDelete(c._id)}>🗑️ Delete</button>
                     </div>
                   </td>
                 </tr>
@@ -479,7 +501,7 @@ function CustomerCards({ customers, onEdit, onDelete }) {
             {customers.filter(c => c.customerName[0].toUpperCase() === letter).map((c) => {
               const cfg = STATUS_CONFIG[c.status];
               return (
-                <div key={c._id} style={{ ...styles.card, borderLeft: `5px solid ${cfg.color}`, animation: "fadeIn 0.3s ease" }}>
+                <div className="hover-card" key={c._id} style={{ ...styles.card, borderLeft: `5px solid ${cfg.color}`, animation: "fadeIn 0.3s ease" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "12px" }}>
                     <div>
                       <h3 style={{ margin: 0, color: "#f9fafb", fontSize: "18px" }}>{c.customerName}</h3>
@@ -490,7 +512,7 @@ function CustomerCards({ customers, onEdit, onDelete }) {
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "13px", color: "#d1d5db", marginBottom: "8px" }}>
                     <span>🏦 {c.bank}</span>
                     <span>📍 {c.bankVillage}</span>
-                    <span style={{ gridColumn: "1 / -1", color: "#fbbf24" }}>💳 {c.bankAccountName || "No Account Name"}</span>
+                    <span style={{ gridColumn: "1 / -1", color: "#fbbf24" }}>💳 {c.bankAccountName || "No Officer Name"}</span>
                     {c.bankOfficePhone && <a href={`tel:${c.bankOfficePhone}`} style={{ color: "#fbbf24", textDecoration: "none", gridColumn: "1 / -1" }}>📞 Bank Office: {c.bankOfficePhone}</a>}
                     <a href={`tel:${c.phone}`} style={{ color: "#60a5fa", textDecoration: "none", gridColumn: "1 / -1" }}>📱 Phone 1: {c.phone}</a>
                   </div>
@@ -501,8 +523,8 @@ function CustomerCards({ customers, onEdit, onDelete }) {
                     ))}
                   </div>
                   <div style={{ display: "flex", gap: "8px" }}>
-                    <button style={{ ...styles.editBtn, flex: 1 }} onClick={() => onEdit(c)}>✏️ Edit</button>
-                    <button style={{ ...styles.deleteBtn, flex: 1 }} onClick={() => onDelete(c._id)}>🗑️ Delete</button>
+                    <button className="hover-btn" style={{ ...styles.editBtn, flex: 1 }} onClick={() => onEdit(c)}>✏️ Edit</button>
+                    <button className="hover-btn" style={{ ...styles.deleteBtn, flex: 1 }} onClick={() => onDelete(c._id)}>🗑️ Delete</button>
                   </div>
                 </div>
               );
@@ -555,7 +577,7 @@ function CustomerModal({ customer, token, onClose, onSaved }) {
       <div style={styles.modal}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
           <h2 style={{ margin: 0, color: "#f9fafb" }}>{customer ? "✏️ Customer Edit చేయండి" : "➕ కొత్త Customer Add చేయండి"}</h2>
-          <button style={styles.closeBtn} onClick={onClose}>✕</button>
+          <button className="hover-btn" style={styles.closeBtn} onClick={onClose}>✕</button>
         </div>
         {error && <div style={styles.error}>{error}</div>}
 
@@ -584,8 +606,8 @@ function CustomerModal({ customer, token, onClose, onSaved }) {
             {phoneError && <p style={{ color: "#ef4444", fontSize: "11px", margin: "4px 0 0" }}>⚠️ {phoneError}</p>}
           </div>
           <div>
-            <label style={styles.label}>Bank Account Name 💳</label>
-            <input style={styles.modalInput} value={form.bankAccountName} onChange={(e) => set("bankAccountName")(e.target.value)} placeholder="A/C Holder Name" />
+            <label style={styles.label}>Bank Officer Name 💳</label>
+            <input style={styles.modalInput} value={form.bankAccountName} onChange={(e) => set("bankAccountName")(e.target.value)} placeholder="Bank Officer Name" />
           </div>
           <div>
             <label style={styles.label}>Bank Office Number 📞</label>
@@ -625,10 +647,10 @@ function CustomerModal({ customer, token, onClose, onSaved }) {
         </div>
 
         <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
-          <button style={{ ...styles.primaryBtn, flex: 1, marginBottom: 0 }} onClick={validateAndSave} disabled={loading}>
+          <button className="hover-btn" style={{ ...styles.primaryBtn, flex: 1, marginBottom: 0 }} onClick={validateAndSave} disabled={loading}>
             {loading ? "⏳ Saving..." : customer ? "💾 Update చేయండి" : "✅ Save చేయండి"}
           </button>
-          <button style={{ ...styles.logoutBtn, padding: "14px 20px" }} onClick={onClose}>Cancel</button>
+          <button className="hover-btn" style={{ ...styles.logoutBtn, padding: "14px 20px" }} onClick={onClose}>Cancel</button>
         </div>
       </div>
     </div>
@@ -642,8 +664,8 @@ function ConfirmDialog({ message, onConfirm, onCancel }) {
         <div style={{ fontSize: "48px", marginBottom: "16px" }}>⚠️</div>
         <p style={{ color: "#f9fafb", fontSize: "18px", marginBottom: "24px" }}>{message}</p>
         <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
-          <button style={{ ...styles.deleteBtn, padding: "12px 24px", fontSize: "14px" }} onClick={onConfirm}>🗑️ Delete చేయండి</button>
-          <button style={{ ...styles.logoutBtn, padding: "12px 24px" }} onClick={onCancel}>Cancel</button>
+          <button className="hover-btn" style={{ ...styles.deleteBtn, padding: "12px 24px", fontSize: "14px" }} onClick={onConfirm}>🗑️ Delete చేయండి</button>
+          <button className="hover-btn" style={{ ...styles.logoutBtn, padding: "12px 24px" }} onClick={onCancel}>Cancel</button>
         </div>
       </div>
     </div>
